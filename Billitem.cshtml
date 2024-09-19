@@ -1,0 +1,705 @@
+              
+@model AXIS_IPortal.Areas.RENT.Models.ContractSC
+@{
+    ViewBag.Title = "Contract Master";
+    Layout = "~/Views/Shared/Rent_Layout.cshtml";
+    //bool IsDisplayMode = ViewContext.Controller.ValueProvider.GetValue("action").RawValue.Equals("Display");
+    //bool IsNew = ViewContext.Controller.ValueProvider.GetValue("action").RawValue.Equals("Index");
+    //bool IsEdit = ViewContext.Controller.ValueProvider.GetValue("action").RawValue.Equals("Edit");
+    //var HasError = ViewData.ModelState.Values.Where(v => v.Errors.Count != 0).Any();
+    BZ.Framework.User.SC.UserObj _UserObj = BZ.Framework.User.WebAppSession.User();
+}
+<script src="~/Areas/RENT/Views/Contract/ContractMaster.js"></script>
+<script src="~/Resx/Lookup/Lkp.js"></script>
+<div ng-controller="ContractCtrl">
+    @using (Ajax.BeginForm("", "", new AjaxOptions
+    {
+
+    }, new { id = "Form", @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row header alert alert-warning padding-min">
+            <div class="col-md-12 col-xs-12">
+                <h3 class="text-muted top7">
+                    <span class="glyphicon glyphicon-list"></span>
+                    Contract
+                </h3>
+            </div>
+        </div>
+        <div class="row bottom5">
+            <div class="col-md-12">
+                <div class="text text-danger" id="dvLocValSumm">
+                    @Html.ValidationSummary(false, "The following error encountered on this page.", new { @class = "alert alert-danger" })
+                </div>
+                <div id="dvLocMstError"></div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <ul class="nav nav-tabs">
+                <li id="ContractId" class="active"><a href="#TabContract" data-toggle="tab"><span class="frm-bold"><u>Basic Details </u></span></a></li>
+                <li id="PartyId"><a href="#TabParty" data-toggle="tab"><span class="frm-bold"><u>Party's Details</u></span></a></li>
+                <li id="AggrementId"><a href="#TabAgreement" @*onclick="Aggrementform();"*@ data-toggle="tab"><span class="frm-bold"><u>Agreement</u></span></a></li>
+                <li id="BillSectionId"><a href="#TabBillSection" data-toggle="tab"><span class="frm-bold "><u>Billing Section</u></span></a></li>
+            </ul>
+            <div class="tab-content">
+                <div id="TabContract" class="tab-pane fade in active">
+                    <div id="AppLocList" class="top5">
+                        <div class="thumbnail section-padding">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group x-form-TR-BorderBottom">
+                                        <label class="col-md-5 control-label required"> Contract Name : </label>
+                                        <div class="col-md-7">
+                                            @Html.TextBoxFor(model => model.ContractName, new { id = "txtContract", @autocomplete = "off", @class = "form-control ", placeholder = " Enter Company Name" })
+                                            <div class="fld-val-msg text-danger">
+                                                @Html.ValidationMessageFor(model => model.ContractName)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group x-form-TR-BorderBottom">
+                                        <label class="col-md-5 control-label required"> Branch : </label>
+                                        <div class="col-md-7">
+                                            @Html.DropDownListFor(model => model.Branch, new SelectList(
+                                                new List<Object>{
+                                                  new { value = "0" , text = "--Select--" },
+                                                   new { value = "Mumbai" , text = "Mumbai" },
+                                                    new { value = "Pune" , text = "Pune" },
+                                                    new { value = "bangalore" , text = "bangalore" }}, "value",
+                                                "text", ""), new { @class = "form-control select2_single", @placeholder = "--Select--" })
+                                            <div class="fld-val-msg text-danger">
+                                                @Html.ValidationMessageFor(model => model.Branch)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group x-form-TR-BorderBottom">
+                                        <label class="col-md-5 control-label required"> Contract Type : </label>
+                                        <div class="col-md-7">
+                                            @Html.DropDownListFor(model => model.ContractType, new SelectList(
+                                            new List<Object>{
+                                              new { value = "0" , text = "--Select--" },
+                                               new { value = "Leased" , text = "Leased" },
+                                                new { value = "Mixed" , text = "Mixed" },
+                                                new { value = "Service" , text = "Service" }}, "value",
+                                            "text", ""), new { @class = "form-control input-sm select2_single", @placeholder = "--Select--" })
+                                            <div class="fld-val-msg text-danger">
+                                                @Html.ValidationMessageFor(model => model.ContractType)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group x-form-TR-BorderBottom">
+                                        <label class="col-md-5 control-label required"> Period   : </label>
+                                        <div class="col-md-7">
+                                            @Html.TextBoxFor(model => model.Period, new { id = "txtPeriod", @autocomplete = "off", @class = "form-control ", placeholder = " Enter Period Name" })
+                                            <div class="fld-val-msg text-danger">
+                                                @Html.ValidationMessageFor(model => model.Period)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group x-form-TR-BorderBottom">
+                                        <label class="col-md-5 control-label required"> Period From  : </label>
+                                        <div class="col-md-7">
+
+                                            <div class="input-group">
+                                                @Html.TextBoxFor(model => model.FromDate, new { id = "txtFromDate", @autocomplete = "off", @class = "form-control InputdatepickerDate ", placeholder = " Select Period Date From " })
+                                                <span id="spnDateOfListing" class="input-group-addon" style="cursor: pointer" onclick="ShowCal1(this);">
+                                                    <span class="glyphicon glyphicon-calendar"></span>
+                                                </span>
+                                            </div>
+                                            <div class="fld-val-msg text-danger">
+                                                @Html.ValidationMessageFor(model => model.FromDate)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group x-form-TR-BorderBottom">
+                                        <label class="col-md-5 control-label required"> Period To  : </label>
+                                        <div class="col-md-7">
+
+                                            <div class="input-group">
+                                                @Html.TextBoxFor(model => model.ToDate, new { id = "txtToDate", @autocomplete = "off", @class = "form-control InputdatepickerDate ", placeholder = " Select Period To Date" })
+                                                <span id="spnDateOfListing" class="input-group-addon" style="cursor: pointer" onclick="ShowCal1(this);">
+                                                    <span class="glyphicon glyphicon-calendar"></span>
+                                                </span>
+                                            </div>
+                                            <div class="fld-val-msg text-danger">
+                                                @Html.ValidationMessageFor(model => model.ToDate)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group x-form-TR-BorderBottom">
+                                        <label class="col-md-5 control-label required">Contract Status : </label>
+                                        <div class="col-md-7">
+
+                                            <label class="radio-inline">
+                                                @Html.RadioButtonFor(model => model.ContractStatus, "Draft", new { }) Draft
+                                            </label>
+                                            <span style="padding-left:20px"></span>
+                                            <label class="radio-inline">
+                                                @Html.RadioButtonFor(model => model.ContractStatus, "Under Process", new { })Under Process
+                                            </label>
+                                            <span style="padding-left:20px"></span>
+                                            <label class="radio-inline">
+                                                @Html.RadioButtonFor(model => model.ContractStatus, "Final", new { })Final
+                                            </label>
+                                            <div class="fld-val-msg text-danger">
+                                                @Html.ValidationMessageFor(model => model.ContractStatus)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-md-8">
+                            <div class="row bottom5">
+                                <div class="col-md-8">
+                                    <div class="top5 pull-right text-center-xs">
+                                        <button type="button" class="btn btn-success btn-sm text-uppercase" value="Save" name="Command" id="btnSave" onclick="GetData();">
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="TabParty" class="tab-pane fade in">
+                    <div id="AppProductList" class="top5">
+                        <div class="panel panel-plain" id="divProductDtlsLst">
+                            <div class="panel-heading">
+                                <div class="panel-heading-title">Party's Details</div>
+                            </div>
+                            <div class="panel-body" style="width: 99%;">
+                                <div class="table-responsive">
+                                    <table class="table table-condensed table-pink table-bordered ">
+                                        <tbody>
+                                            <tr>
+                                                <th>Sr.</th>
+                                                <th class="grid-header-item ">Party </th>
+                                                <th class="grid-header-item ">Entities </th>
+                                                <th class="grid-header-item ">Type</th>
+                                                <th class="grid-header-item">Edit/View</th>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    1
+                                                </td>
+                                                <td>
+                                                    ConsultWay Pvt Ltd
+                                                </td>
+                                                <td>
+                                                    Niraj Joshi
+                                                </td>
+                                                <td>
+                                                    Party A
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-xs btn-darkgray">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    2
+                                                </td>
+                                                <td>
+                                                    BlueZone
+                                                </td>
+                                                <td>
+                                                    Hardik Bhatt
+                                                </td>
+                                                <td>
+                                                    Party B
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-xs btn-darkgray">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    3
+                                                </td>
+                                                <td>
+                                                    BlueZone
+                                                </td>
+                                                <td>
+                                                    Sarfaraz khan
+                                                </td>
+                                                <td>
+                                                    Party B
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-xs btn-darkgray">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="top5" id="dvActionView">
+                                        <button type="button" id="btnAddProductDtls" @*ng-click="AddPartyDtls();"*@ onclick="AddPartyDtls();"
+                                                class="btn btn-xs btn-info">
+                                            <span class="glyphicon glyphicon-plus"></span>Add Party
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @Html.HiddenFor(model => model.PartyDtls, new { id = "hiddPartyDtls" })
+                    </div>
+                    <div class="modal fade in" id="CanCreateVoucherDialog" style="display: none;" role="dialog" aria-hidden="false" aria-labelledby="windowTitleLabel" data-backdrop="static">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header dlg-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h4 class="modal-title">New Party</h4>
+                                </div>
+                                <div class="modal-body form-horizontal">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group x-form-TR-BorderBottom">
+                                                <label class="col-md-5 control-label required">Party Name : </label>
+                                                <div class="col-md-7">
+                                                    @Html.TextBoxFor(model => model.PartyName, new { id = "txtParty", @autocomplete = "off", @class = "form-control ", placeholder = " Enter Party Name" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group x-form-TR-BorderBottom">
+                                                <label class="col-md-5 control-label required">Entities : </label>
+                                                <div class="col-md-7">
+                                                    @Html.TextBoxFor(model => model.Entities, new { id = "txtEntities", @autocomplete = "off", @class = "form-control ", placeholder = " Enter Entities " })
+                                                </div>
+                                            </div>
+                                            <div class="form-group x-form-TR-BorderBottom">
+                                                <label class="col-md-5 control-label required">Type : </label>
+                                                <div class="col-md-7">
+                                                    @Html.TextBoxFor(model => model.Type, new { id = "txtType", @autocomplete = "off", @class = "form-control ", placeholder = " Enter Type " })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-sm btn-primary text-uppercase" data-dismiss="modal" aria-label="Close" onclick="GetPartydata();">
+                                        <span class="glyphicon glyphicon-ok"></span>
+                                        Ok
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default text-uppercase" data-dismiss="modal">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="TabAgreement" class="tab-pane fade in">
+                    <div id="AppProductList" class="top5">
+                        <div class="panel panel-plain" id="divProductDtlsLst">
+                            <div class="panel-heading">
+                                <div class="panel-heading-title">Agreement Details</div>
+                            </div>
+                            <div class="panel-body" style="width: 99%;">
+                                <div class="table-responsive">
+                                    <table class="table table-condensed table-pink table-bordered ">
+                                        <tbody>
+                                            <tr>
+                                                <th>Sr.</th>
+                                                <th class="grid-header-item ">Agreement Title</th>
+                                                <th class="grid-header-item ">Period From </th>
+                                                <th class="grid-header-item ">Period To</th>
+                                                <th class="grid-header-item ">Party A</th>
+                                                <th class="grid-header-item ">Party B</th>
+                                                <th class="grid-header-item ">Status </th>
+                                                <th class="grid-header-item">Edit/View</th>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    1
+                                                </td>
+                                                <td>
+                                                    Sale Agreement
+                                                </td>
+                                                <td>
+                                                    15/May/2024
+                                                </td>
+                                                <td>
+                                                    20/May/2025
+                                                </td>
+                                                <td>
+                                                    ConsultWay Pvt Ltd
+                                                </td>
+                                                <td>
+                                                    Surya Enterprise Pvt Ltd
+                                                </td>
+                                                <td>
+                                                    Final
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-xs btn-darkgray">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    2
+                                                </td>
+                                                <td>
+                                                    Purchase Agreement
+                                                </td>
+                                                <td>
+                                                    05/May/2024
+                                                </td>
+                                                <td>
+                                                    20/May/2026
+                                                </td>
+                                                <td>
+                                                    Force Enterprise Pvt Ltd
+                                                </td>
+                                                <td>
+                                                    Jedi Marketing Pvt Ltd
+                                                </td>
+                                                <td>
+                                                    Under Process
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-xs btn-darkgray">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    3
+                                                </td>
+                                                <td>
+                                                    Security Agreement
+                                                </td>
+                                                <td>
+                                                    111/May/2024
+                                                </td>
+                                                <td>
+                                                    20/May/2029
+                                                </td>
+                                                <td>
+                                                    Jedi Marketing Pvt Ltd
+                                                </td>
+                                                <td>
+                                                    Birla Marketing Pvt Ltd
+                                                </td>
+                                                <td>
+                                                    Final
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-xs btn-darkgray">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="top5" id="dvActionView">
+                                        <button type="button" id="btnAgreement" onclick="Aggrementform();"
+                                                class="btn btn-xs btn-info">
+                                            <span class="glyphicon glyphicon-plus"></span>Add Agreement
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @Html.HiddenFor(model => model.PartyDtls, new { id = "hiddPartyDtls" })
+                    </div>
+                </div>
+                <div id="TabBillSection" class="tab-pane fade in">
+                    <div id="AppBillList" class="top5">
+                        <div class="panel panel-plain" id="divBillDtl">
+                            <div class="panel-heading">
+                                <div class="panel-heading-title">Billing Setup Group </div>
+                                <div class="col-md-3 col-xs-5 text-right  pull-right">
+                                    <button type="button" class="btn btn-primary btn-sm text-uppercase" value="Bill" onclick="AddBillsetup();" name="Action" id="btnBillSetup">
+                                        <span class="glyphicon glyphicon-plus-sign"></span>
+                                        Add New Billing Setup
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="AppBillSetup" class="top5">
+                                <div ng-repeat="item in BillSetupDtls">
+                                    <label class="btn btn-darkgray btn-sm">Group{{item.RowId}}</label>
+                                    <button type="button" class="btn btn-xs btn-primary" ng-click="EditBillSetup($index);"> <span class="glyphicon glyphicon-edit"></span></button>
+                                    <div class="thumbnail section-padding">
+                                        <div class="row top5">
+                                            <div class="col-md-12">
+                                                <div class="col-md-6">
+                                                    <div class="form-group x-form-TR-BorderBottom">
+                                                        <label class="col-md-5 control-label required">Contract Name : </label>
+                                                        <div class="col-md-5">
+                                                            <input id="txtContract_{{$index+1}}" type="text" class="form-control" ng-model="item.Contract" placeholder="Contract Name " disabled="{{isDisabled}}" />
+                                                            <input type="hidden" name="txtContract[{{$index}}].PaymentRent" value='{{item.Contract}}' />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group x-form-TR-BorderBottom">
+                                                        <label class="col-md-5 control-label required">Payment Schedule For Rent : </label>
+                                                        <div class="col-md-5">
+                                                            <input id="txtPaymentRent_{{$index+1}}" type="text" class="form-control" ng-model="item.PaymentRent" placeholder="Payment Schedule For Rent" disabled="{{isDisabled}}" />
+                                                            <input type="hidden" name="txtPaymentRent[{{$index}}].PaymentRent" value='{{item.PaymentRent}}' />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group x-form-TR-BorderBottom">
+                                                        <label class="col-md-5 control-label required">Aggrement Tittle: </label>
+                                                        <div class="col-md-5">
+                                                            <input id="txtAggrement_{{$index+1}}" type="text" class="form-control" ng-model="item.AgreementTitle" placeholder="Aggrement Tittle" disabled="{{isDisabled}}" />
+                                                            <input type="hidden" name="txtAggrement[{{$index}}].Aggrement" value='{{item.Aggrement}}' />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group x-form-TR-BorderBottom">
+                                                                <label class="col-md-5 control-label required">Bill Period From :  </label>
+                                                                <div class="col-md-5">
+                                                                    <input id="txtBillPerFrom_{{$index+1}}" type="text" class="form-control" ng-model="item.BillPerFrom" placeholder="Bill Period From" disabled="{{isDisabled}}" />
+                                                                    <input type="hidden" name="txtBillPerFrom[{{$index}}].BillPerFrom" value='{{item.BillPerFrom}}' />
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group x-form-TR-BorderBottom">
+                                                                <label class="col-md-5 control-label required">Expected Bill Date :  </label>
+                                                                <div class="col-md-5">
+                                                                    <input id="txtExpBillDate_{{$index+1}}" type="text" class="form-control" ng-model="item.ExpBillDate" placeholder="Expected Bill Date" disabled="{{isDisabled}}" />
+                                                                    <input type="hidden" name="txtExpBillDate[{{$index}}].ExpBillDate" value='{{item.ExpBillDate}}' />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group x-form-TR-BorderBottom">
+                                                                <label class="col-md-5 control-label required">Bill Period To: </label>
+                                                                <div class="col-md-5">
+                                                                    <input id="txtBillPerTo_{{$index+1}}" type="text" class="form-control" ng-model="item.BillPeriodTo" placeholder="Bill Period To" disabled="{{isDisabled}}" />
+                                                                    <input type="hidden" name="txtBillPerTo[{{$index}}].BillPerTo" value='{{item.BillPerTo}}' />
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group x-form-TR-BorderBottom">
+                                                                <label class="col-md-5 control-label required">Expected Bill Due Date : </label>
+                                                                <div class="col-md-5">
+                                                                    <input id="txtExpBillDue_{{$index+1}}" type="text" class="form-control" ng-model="item.ExpBillDueDate" placeholder="Expected Bill Due Date" disabled="{{isDisabled}}" />
+                                                                    <input type="hidden" name="txtExpBillDue[{{$index}}].ExpBillDue" value='{{item.ExpBillDue}}' />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="panel-body" style="width: 99%;">
+                                            <div class="table-responsive">
+                                                <table class="table table-condensed table-pink table-bordered">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th>Sr.</th>
+                                                            <th class="grid-header-item">Expense Name</th>
+                                                            <th class="grid-header-item">Expense</th>
+                                                            <th class="grid-header-item">Action</th>
+                                                        </tr>
+                                                        <tr ng-repeat="Exp in item.AddExpenseDtls" on-finish-render="ngProductRepeatFinished">
+                                                            <td>{{$index + 1}}</td>
+                                                            <td>{{Exp.ExpenseName}}</td>
+                                                            <td>{{Exp.Expense}}</td>
+                                                            <td>
+                                                                <button type="button" class="btn btn-xs btn-danger" ng-click="deleteExpense(item, $index)">
+                                                                    <span class="glyphicon glyphicon-trash"></span> Delete
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <div class="top5" id="dvActionView">
+                                                    <button type="button" id="btnAddExpenseDtl" ng-click="AddExpenseDtl($index);" class="btn btn-xs btn-info">
+                                                        <span class="glyphicon glyphicon-plus"></span>Add
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @Html.HiddenFor(model => model.BillSetupDtls, new { id = "hiddBillSetupDtls" })
+                                @Html.HiddenFor(model => model.ExpenseDtlslst, new { id = "hiddExpenseDtlslst" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade in" id="BillSetupDialog" style="display: none;" role="dialog" aria-hidden="false" aria-labelledby="windowTitleLabel" data-backdrop="static">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header dlg-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h4 class="modal-title">Contract Bill Setup</h4>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="panel panel-plain ">
+                                        <div class="panel-heading">
+                                            <div class="panel-heading-title">
+                                                Billing Details
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-body form-horizontal">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="col-md-6">
+                                                <div class="form-group x-form-TR-BorderBottom">
+                                                    <label class="col-md-5 control-label required">Contract Name : </label>
+                                                    <div class="col-md-7">
+                                                        @Html.TextBoxFor(model => model.ContractName, new { id = "txtContractName", @autocomplete = "off", @class = "form-control ", placeholder = " Enter Contract Name" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group x-form-TR-BorderBottom">
+                                                    <label class="col-md-5 control-label required">Payment Schedule For Rent : </label>
+                                                    <div class="col-md-7">
+                                                        <div class="input-group">
+                                                            <label class="radio-inline">
+                                                                @Html.RadioButtonFor(model => model.PaymentRent, "Monthly", new { id = "txtPaymentRent", name = "Monthly", }) Monthly
+                                                            </label>
+                                                            <label class="radio-inline">
+                                                                @Html.RadioButtonFor(model => model.PaymentRent, "Quaterly", new { id = "txtPaymentRent", name = "Quaterly" }) Quaterly
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group x-form-TR-BorderBottom">
+                                                    <label class="col-md-5 control-label required">Agreement Tillte : </label>
+                                                    <div class="col-md-7">
+                                                        @Html.DropDownListFor(model => model.AgreementTitle, new SelectList(
+                                                        new List<Object>{
+                                                          new { value = "0" , text = "--Select an Option--" },
+                                                           new { value = "Sale Agreement" , text = "Sale Agreement" },
+                                                            new { value = "Purchase Agreement" , text = "Purchase Agreement" }}, "value",
+                                                        "text", ""), new { id = "txtAgreementTitle", @class = "form-control input-sm select2_single", @placeholder = "--Select an Option--" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group x-form-TR-BorderBottom">
+                                                            <label class="col-md-5 control-label required">Bill Period From  : </label>
+                                                            <div class="col-md-7">
+                                                                <div class="input-group">
+                                                                    @Html.TextBoxFor(model => model.BillPeriodFrom, new { id = "txtBillPeriodFrom", @class = "form-control  InputdatepickerDate", placeholder = "Select Bill Period From", tabindex = "15", Autocomplete = "off" })
+                                                                    <span id="spDateFrom" class="input-group-addon" style="cursor: pointer" onclick="ShowCal(this);">
+                                                                        <span class="glyphicon glyphicon-calendar"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group x-form-TR-BorderBottom">
+                                                            <label class="col-md-5 control-label required">Expected Bill Date  : </label>
+                                                            <div class="col-md-7">
+                                                                <div class="input-group">
+                                                                    @Html.TextBoxFor(model => model.ExpBillDate, new { id = "txtExpBillDate", @class = "form-control  InputdatepickerDate", placeholder = "Select Expected Bill Date", tabindex = "15", Autocomplete = "off" })
+                                                                    <span id="spDateFrom" class="input-group-addon" style="cursor: pointer" onclick="ShowCal(this);">
+                                                                        <span class="glyphicon glyphicon-calendar"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group x-form-TR-BorderBottom">
+                                                            <label class="col-md-5 control-label required">Bill Period To  : </label>
+                                                            <div class="col-md-7">
+                                                                <div class="input-group">
+                                                                    @Html.TextBoxFor(model => model.BillPeriodTo, new { id = "txtBillPeriodTo", @class = "form-control  InputdatepickerDate", placeholder = "Select Bill Period To", tabindex = "15", Autocomplete = "off" })
+                                                                    <span id="spDateFrom" class="input-group-addon" style="cursor: pointer" onclick="ShowCal(this);">
+                                                                        <span class="glyphicon glyphicon-calendar"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group x-form-TR-BorderBottom">
+                                                            <label class="col-md-5 control-label required">Expected Bill Due Date : </label>
+                                                            <div class="col-md-7">
+                                                                <div class="input-group">
+                                                                    @Html.TextBoxFor(model => model.ExpBillDueDate, new { id = "txtExpBillDueDate", @class = "form-control  InputdatepickerDate", placeholder = "Select Expected Bill Due Date", tabindex = "15", Autocomplete = "off" })
+                                                                    <span id="spDateFrom" class="input-group-addon" style="cursor: pointer" onclick="ShowCal(this);">
+                                                                        <span class="glyphicon glyphicon-calendar"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-sm btn-primary text-uppercase" data-dismiss="modal" aria-label="Close" onclick="GetBilldata();">
+                                        <span class="glyphicon glyphicon-ok"></span>
+                                        Ok
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default text-uppercase" data-dismiss="modal">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*Expense Modal*@
+                    <div class="modal fade in" id="ExpenseDtlDialog" style="display: none;" role="dialog" aria-hidden="false" aria-labelledby="windowTitleLabel" data-backdrop="static">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header dlg-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h4 class="modal-title">New Party</h4>
+                                </div>
+                                <div class="modal-body form-horizontal">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group x-form-TR-BorderBottom">
+                                                <label class="col-md-5 control-label required">Expense Name : </label>
+                                                <div class="col-md-7">
+                                                    @Html.TextBoxFor(model => model.ExpenseName, new { id = "txtExpenseName", @autocomplete = "off", @class = "form-control ", placeholder = "Enter Expense Name " })
+                                                </div>
+                                            </div>
+                                            <div class="form-group x-form-TR-BorderBottom">
+                                                <label class="col-md-5 control-label required">Expense : </label>
+                                                <div class="col-md-7">
+                                                    @Html.TextBoxFor(model => model.Expense, new { id = "txtExpense", @autocomplete = "off", @class = "form-control ", placeholder = " Enter Expense " })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-sm btn-primary text-uppercase" data-dismiss="modal" aria-label="Close" onclick="GetExpensedata();">
+                                        <span class="glyphicon glyphicon-ok"></span>
+                                        Ok
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default text-uppercase" data-dismiss="modal">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+
+
